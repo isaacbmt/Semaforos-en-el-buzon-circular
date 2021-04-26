@@ -104,22 +104,22 @@ int init_semaphores (char* statsSemaphore, char* producerSemaphore, char* consum
     sem_t* producerSem = sem_open(producerSemaphore, O_CREAT, 0644, block_size);
     sem_t* consumerSem = sem_open(consumerSemaphore, O_CREAT, 0644, 0);
 
-    if (statsSem == SEM_FAILED){
+    if (statsSem == SEM_FAILED) {
         perror("Open the stats semaphore failed\n");
         return 1;
     }
 
-    else if (producerSem == SEM_FAILED){
+    else if (producerSem == SEM_FAILED) {
         perror("Open the producer semaphore failed\n");
         return 1;
     }
 
-    else if (consumerSem == SEM_FAILED){
+    else if (consumerSem == SEM_FAILED) {
         perror("Open the consumer semaphore failed\n");
         return 1;
     }
 
-    else{
+    else {
         return 0;
     }
 }

@@ -107,27 +107,23 @@ int* create_shared_memory(int file_descriptor, int length) {
 }
 
 int  openSemaphores (sem_t const* statsSem, sem_t const* producerSem, sem_t const* consumerSem, char* statsSemaphoreName,
-                     char* producerSemaphoreName, char* consumerSemaphoreName){
+                     char* producerSemaphoreName, char* consumerSemaphoreName) {
     statsSem = sem_open(statsSemaphoreName, 0);
     producerSem = sem_open(producerSemaphoreName, 0);
     consumerSem  = sem_open(consumerSemaphoreName, 0);
-
-    if (statsSem == SEM_FAILED){
+    if (statsSem == SEM_FAILED) {
         perror("Opening the stats semaphore failed\n");
         return 1;
     }
-
-    else if (producerSem == SEM_FAILED){
+    else if (producerSem == SEM_FAILED) {
         perror("Opening the producer semaphore failed\n");
         return 1;
     }
-
     else if(consumerSem == SEM_FAILED) {
         perror("Opening the consumer semaphore failed\n");
         return 1;
     }
-
-    else{
+    else {
         return 0;
     }
 }
@@ -153,18 +149,16 @@ int endSemaphores(sem_t* statsSem, sem_t* producerSem, sem_t* consumerSem,
 
 }
 
-void finishingMessage(struct Stats* stats){
+void finishingMessage(struct Stats* stats) {
     printf("Aqui se escriben todos los datos aaaaaaaaaaa\n");
 }
 
-int run_process(struct Stats* stats, sem_t* statsSem, sem_t* producerSem, sem_t* consumerSem,
-        char* bufferName, char* structName, int stats_fd, int mem_fd, char* statsSemaphoreName,
-        char* producerSemaphoreName, char* consumerSemaphoreName){
+int run_process(struct Stats* stats, sem_t* statsSem, sem_t* producerSem, sem_t* consumerSem, char* bufferName,
+        char* structName, int stats_fd, int mem_fd, char* statsSemaphoreName,
+        char* producerSemaphoreName, char* consumerSemaphoreName) {
 
     while(1){
-
         sem_wait(statsSem);
-
         if(stats->consumers == 0 && stats->producers == 0){
             sem_post(statsSem);
             break;
@@ -175,13 +169,13 @@ int run_process(struct Stats* stats, sem_t* statsSem, sem_t* producerSem, sem_t*
     }
 
     finishingMessage(stats);
-    int semaphoreResult = endSemaphores(statsSem, producerSem, consumerSem,
-                                        statsSemaphoreName, producerSemaphoreName,consumerSemaphoreName);
-    if (semaphoreResult != 0){
+    int semaphoreResult = endSemaphores(statsSem, producerSem, consumerSem, statsSemaphoreName, producerSemaphoreName,
+                                        consumerSemaphoreName);
+    if (semaphoreResult != 0) {
         printf("Unable to close the semaphores\n");
         return 1;
     }
-    else{
+    else {
         close(stats_fd);
         close(mem_fd);
         shm_unlink(bufferName);

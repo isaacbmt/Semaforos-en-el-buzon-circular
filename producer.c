@@ -66,6 +66,11 @@ int main(__attribute__((unused)) int argc, char** argv) {
     srand(time(0));
     mode chosen_mode = strcmp(argv[2], "auto") == 0? automatic : strcmp(argv[2], "manual") == 0? manual : no_specified;
 
+    if (chosen_mode == no_specified) {
+        printf("Error: No se especifico el modo del productor");
+        return 1;
+    }
+
     //Initialize the semaphores
     int semaphoresInitResult = openSemaphores(statsSem, producerSem, consumerSem,
                                               statsSemaphoreName, producerSemaphoreName, consumerSemaphoreName);
@@ -117,17 +122,14 @@ int openSemaphores (const sem_t* statsSem, const sem_t* producerSem, const sem_t
         perror("Opening the stats semaphore failed\n");
         return 1;
     }
-
     else if (producerSem == SEM_FAILED){
         perror("Opening the producer semaphore failed\n");
         return 1;
     }
-
     else if(consumerSem == SEM_FAILED) {
         perror("Opening the consumer semaphore failed\n");
         return 1;
     }
-
     else{
         return 0;
     }
@@ -138,9 +140,15 @@ void write_in_buffer(char *source, int *map, struct Stats* stats) {
     time_t raw_time;
     int magic_number = rand() % 7;
 
+    stats->messages_counter++;
     struct tm *info = localtime(&raw_time);
-    sprintf(message, "{Productor id: %d, Mensaje: %s, Fecha: %s, Número mágico: %d}",
-                        getpid(), source, asctime(info), magic_number);
+
+    if (stats->finish == 1 && stats->consumers != 0) {
+        sprintf(message, "/STOP");
+    } else {
+        sprintf(message, "{Número mágico: %d, Productor id: %d, Mensaje: %s, Fecha: %s}",
+                magic_number, getpid(), source, asctime(info));
+    }
     copy_chars_in_index((char *) map, message, map + stats->start_write * stats->buffer_size, stats->buffer_size);
 
     printf(BLACK);
@@ -186,11 +194,11 @@ int run_process(mode chosen_mode, int *map, struct Stats* stats, sem_t* statsSem
         }
         switch (chosen_mode) {
             case automatic:
-                printf("a");
+                printf("Automatico");
                 sprintf(message, "Hola soy un mensaje autogenerado y mi numero favorito es el %d", rand()%30);
                 break;
             case manual:
-                printf("m");
+                printf("Escribe un mensaje: ");
                 fgets(message, stats->buffer_size + 1, stdin);
                 message[strcspn(message, "\n")] = 0;
                 break;
