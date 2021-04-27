@@ -151,6 +151,7 @@ int endSemaphores(sem_t* statsSem, sem_t* producerSem, sem_t* consumerSem,
 
 void finishingMessage(struct Stats* stats) {
     printf("Aqui se escriben todos los datos aaaaaaaaaaa\n");
+
 }
 
 int run_process(struct Stats* stats, sem_t* statsSem, sem_t* producerSem, sem_t* consumerSem, char* bufferName,
@@ -159,7 +160,12 @@ int run_process(struct Stats* stats, sem_t* statsSem, sem_t* producerSem, sem_t*
 
     while(1){
         sem_wait(statsSem);
-        if(stats->consumers == 0 && stats->producers == 0){
+
+        if (stats->consumers == 0 && stats->producers) {
+            sem_post(producerSem);
+        }
+
+        if(stats->consumers == 0 && stats->producers == 0) {
             sem_post(statsSem);
             break;
         }

@@ -7,16 +7,16 @@ build:
 	gcc finalizer.c -o finalizer.o
 
 init:
-	./initializer.o memoria1 256 10
+	./initializer.o lda 256 4
 
 prod:
-	./producer.o memoria1 auto
+	./producer.o lda auto
 
 cons:
-	./consumer.o memoria1 auto
+	./consumer.o lda auto
 
 end:
-	./finalizer.o memoria1
+	./finalizer.o lda
 
 clean:
 	rm -rf ./*.o

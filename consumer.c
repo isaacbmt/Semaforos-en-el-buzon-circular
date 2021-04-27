@@ -8,6 +8,7 @@
 #include <time.h>
 #include <semaphore.h>
 #include <stdbool.h>
+
 #define RED "\033[1;31m"
 #define BLACK "\033[1;30m"
 #define GREEN "\033[1;32m"
@@ -173,6 +174,9 @@ int read_in_buffer(int *map, struct Stats* stats, int processID) {
         return 1;
     }
     else if (processID % 6 == MAGICNUMBER) {
+        printf(RED);
+        printf("Se ingreso el numero magico");
+        printf(RESET);
         return 2;
     }
     else{
@@ -201,7 +205,6 @@ int run_process(mode chosen_mode, int *map, struct Stats* stats, sem_t* statsSem
 
         switch (chosen_mode) {
             case automatic:
-                printf("Automatico");
                 break;
             case manual:
                 printf("Presione enter para leer un mensaje: ");

@@ -112,41 +112,47 @@ int* create_shared_memory(int file_descriptor, int length) {
     return map;
 }
 
-int openSemaphores (const sem_t* statsSem, const sem_t* producerSem, const sem_t* consumerSem, char* statsSemaphoreName,
-                     char* producerSemaphoreName, char* consumerSemaphoreName) {
-    statsSem = sem_open(statsSemaphoreName, 0);
-    producerSem = sem_open(producerSemaphoreName, 0);
-    consumerSem  = sem_open(consumerSemaphoreName, 0);
+int openSemaphores (char* statsSemaphoreName,
+                    char* producerSemaphoreName, char* consumerSemaphoreName) {
 
-    if (statsSem == SEM_FAILED){
-        perror("Opening the stats semaphore failed\n");
-        return 1;
-    }
-    else if (producerSem == SEM_FAILED){
+    producerSem = sem_open(producerSemaphoreName, 0);
+
+    if (producerSem == SEM_FAILED) {
         perror("Opening the producer semaphore failed\n");
         return 1;
     }
-    else if(consumerSem == SEM_FAILED) {
+
+    consumerSem  = sem_open(consumerSemaphoreName, 0);
+
+    if(consumerSem == SEM_FAILED) {
         perror("Opening the consumer semaphore failed\n");
         return 1;
     }
-    else{
-        return 0;
+
+    statsSem = sem_open(statsSemaphoreName, 0);
+
+    if (statsSem == SEM_FAILED) {
+        perror("Opening the stats semaphore failed\n");
+        return 1;
     }
+
+    return 0;
 }
 
 void write_in_buffer(char *source, int *map, struct Stats* stats) {
     char message[stats->buffer_size];
     time_t raw_time;
+    time(&raw_time);
     int magic_number = rand() % 7;
 
     stats->messages_counter++;
     struct tm *info = localtime(&raw_time);
 
     if (stats->finish == 1 && stats->consumers != 0) {
-        sprintf(message, "/STOP");
+        sprintf(buffer_block, "/STOP");
+        strcpy(source, "/STOP");
     } else {
-        sprintf(message, "{Número mágico: %d, Productor id: %d, Mensaje: %s, Fecha: %s}",
+        sprintf(buffer_block, "{Número mágico: %d, Productor id: %d, Mensaje: %s, Fecha: %s}",
                 magic_number, getpid(), source, asctime(info));
     }
     copy_chars_in_index((char *) map, message, map + stats->start_write * stats->buffer_size, stats->buffer_size);
@@ -172,7 +178,7 @@ void write_in_buffer(char *source, int *map, struct Stats* stats) {
     printf(RESET);
     printf("%d\n", stats->producers);
     printf(RED);
-    printf("* * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\n");
+    printf("* * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\n\n");
     printf(RESET);
 }
 
@@ -194,7 +200,6 @@ int run_process(mode chosen_mode, int *map, struct Stats* stats, sem_t* statsSem
         }
         switch (chosen_mode) {
             case automatic:
-                printf("Automatico");
                 sprintf(message, "Hola soy un mensaje autogenerado y mi numero favorito es el %d", rand()%30);
                 break;
             case manual:
