@@ -11,10 +11,19 @@
 
 #define RED "\033[1;31m"
 #define BLACK "\033[1;30m"
+#define BLUE "\033[1;34m"
 #define GREEN "\033[1;32m"
 #define RESET "\033[0m"
 
 typedef enum { automatic, manual, no_specified } mode;
+
+struct Times {
+    int messages_counter;
+    double wait_time;
+    double block_time;
+    double user_time;
+    double kernel_time;
+};
 
 struct Stats {
     int consumers;
@@ -174,9 +183,7 @@ int read_in_buffer(int *map, struct Stats* stats, int processID) {
         return 1;
     }
     else if (processID % 6 == MAGICNUMBER) {
-        printf(RED);
-        printf("Se ingreso el numero magico");
-        printf(RESET);
+        stats->deleted_consumers_by_key++;
         return 2;
     }
     else{
@@ -197,9 +204,14 @@ int run_process(mode chosen_mode, int *map, struct Stats* stats, sem_t* statsSem
 
     char message[10];
     int exitCode;
+    double sleepTime;
+    struct timespec beginReal, endReal;
+    struct timespec beginKernel, endKernel;
+    clock_gettime(CLOCK_REALTIME, &beginReal);
+    clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &beginKernel);
 
     while (true) {
-
+        start = clock();
         sem_wait(consumerSem);
         sem_wait(statsSem);
 
@@ -219,7 +231,20 @@ int run_process(mode chosen_mode, int *map, struct Stats* stats, sem_t* statsSem
 
         if(exitCode == 1 || exitCode == 2){
             stats->consumers -= 1;
-            printFinalMessage(exitCode, processID, stats);
+
+            clock_gettime(CLOCK_REALTIME, &endReal);
+            clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &endKernel);
+
+            double secondsReal = (double) (endReal.tv_sec - beginReal.tv_sec) +
+                                 (double) (endReal.tv_nsec - beginReal.tv_nsec)*1e-9;
+            double secondsKernel = (double) (endKernel.tv_sec - beginKernel.tv_sec) +
+                                   (double) (endKernel.tv_nsec - beginKernel.tv_nsec)*1e-9;
+
+            times.kernel_time = secondsKernel;
+            times.user_time = secondsReal - secondsKernel;
+            stats->user_time += times.user_time;
+            stats->kernel_time += times.kernel_time;
+            printFinalMessage(exitCode, processID);
             sem_post(statsSem);
             break;
         }
@@ -232,7 +257,42 @@ int run_process(mode chosen_mode, int *map, struct Stats* stats, sem_t* statsSem
     return 0;
 }
 
-void printFinalMessage(int exitCode, int processID, struct Stats* stats) {
-
+void printFinalMessage(int exitCode, int processID) {
     printf("Se escriben todos los datos finales\n");
+    printf(RED);
+    printf("* * * * * Se ha cerrado este consumidor * * * * *\n");
+    printf(RED);
+    printf("Razón de finalización: ");
+    printf(RESET);
+    printf("%s \n", exitCode == 2? "Número mágico" : "Por mensaje de parada");
+    printf(BLUE);
+    printf("Los datos finales son: \n");
+    printf(GREEN);
+    printf("ID del consumidor: ");
+    printf(RESET);
+    printf("%d\n", processID);
+    printf(GREEN);
+    printf("Cantidad de mensajes consumidos: ");
+    printf(RESET);
+    printf("%d\n", times.messages_counter);
+    printf(GREEN);
+    printf("Tiempo esperando total: ");
+    printf(RESET);
+    printf("%lf\n", times.wait_time);
+    printf(GREEN);
+    printf("Tiempo bloqueado total: ");
+    printf(RESET);
+    printf("%lf\n", times.block_time);
+    printf(GREEN);
+    printf("Tiempo de usuario total: ");
+    printf(RESET);
+    printf("%lf\n", times.user_time);
+    printf(GREEN);
+    printf("Tiempo de kernel total: ");
+    printf(RESET);
+    printf("%lf\n", times.kernel_time);
+    printf(RED);
+    printf("* * * * * * * * * * * * * * * * * * * * * * * * *\n");
+    printf(RESET);
+
 }

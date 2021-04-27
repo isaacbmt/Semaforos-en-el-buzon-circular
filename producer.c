@@ -12,9 +12,18 @@
 #define RED "\033[1;31m"
 #define BLACK "\033[1;30m"
 #define GREEN "\033[1;32m"
+#define BLUE "\033[1;34m"
 #define RESET "\033[0m"
 
 typedef enum { automatic, manual, no_specified } mode;
+
+struct Times {
+    int messages_counter;
+    double wait_time;
+    double block_time;
+    double user_time;
+    double kernel_time;
+};
 
 struct Stats {
     int consumers;
@@ -146,6 +155,7 @@ void write_in_buffer(char *source, int *map, struct Stats* stats) {
     int magic_number = rand() % 7;
 
     stats->messages_counter++;
+    times.messages_counter++;
     struct tm *info = localtime(&raw_time);
 
     if (stats->finish == 1 && stats->consumers != 0) {

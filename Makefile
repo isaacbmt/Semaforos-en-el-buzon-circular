@@ -10,10 +10,10 @@ init:
 	./initializer.o lda 256 4
 
 prod:
-	./producer.o lda auto
+	./producer.o lda auto 0.2
 
 cons:
-	./consumer.o lda auto
+	./consumer.o lda auto 1.5
 
 end:
 	./finalizer.o lda

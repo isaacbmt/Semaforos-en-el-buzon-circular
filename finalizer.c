@@ -7,6 +7,11 @@
 #include <unistd.h>
 #include <semaphore.h>
 
+#define RED "\033[1;31m"
+#define BLACK "\033[1;30m"
+#define GREEN "\033[1;32m"
+#define BLUE "\033[1;34m"
+#define RESET "\033[0m"
 
 struct Stats {
     int consumers;
@@ -149,15 +154,52 @@ int endSemaphores(sem_t* statsSem, sem_t* producerSem, sem_t* consumerSem,
 
 }
 
-void finishingMessage(struct Stats* stats) {
-    printf("Aqui se escriben todos los datos aaaaaaaaaaa\n");
-
+void finishingMessage(struct Stats* stats, int current_cons, int current_prod) {
+    printf(RED);
+    printf("* * * * * Se ha cerrado la memoria compartida * * * * *\n");
+    printf(BLUE);
+    printf("Los datos finales son: \n");
+    printf(GREEN);
+    printf("Mensajes totales: ");
+    printf(RESET);
+    printf("%d\n", stats->messages_counter);
+    printf(GREEN);
+    printf("Consumidores totales: ");
+    printf(RESET);
+    printf("%d\n", current_cons);
+    printf(GREEN);
+    printf("Productores totales: ");
+    printf(RESET);
+    printf("%d\n", current_prod);
+    printf(GREEN);
+    printf("Consumidores eliminados por llave: ");
+    printf(RESET);
+    printf("%d\n", stats->deleted_consumers_by_key);
+    printf(GREEN);
+    printf("Tiempo esperando total: ");
+    printf(RESET);
+    printf("%lf\n", stats->wait_time);
+    printf(GREEN);
+    printf("Tiempo bloqueado total: ");
+    printf(RESET);
+    printf("%lf\n", stats->block_time);
+    printf(GREEN);
+    printf("Tiempo de usuario total: ");
+    printf(RESET);
+    printf("%lf\n", stats->user_time);
+    printf(GREEN);
+    printf("Tiempo de kernel total: ");
+    printf(RESET);
+    printf("%lf\n", stats->kernel_time);
+    printf(RED);
+    printf("* * * * * * * * * * * * * * * * * * * * * * * * * * * *\n");
+    printf(RESET);
 }
 
 int run_process(struct Stats* stats, sem_t* statsSem, sem_t* producerSem, sem_t* consumerSem, char* bufferName,
         char* structName, int stats_fd, int mem_fd, char* statsSemaphoreName,
         char* producerSemaphoreName, char* consumerSemaphoreName) {
-
+    int current_cons = stats->consumers, current_prod = stats->producers;
     while(1){
         sem_wait(statsSem);
 
