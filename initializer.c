@@ -34,6 +34,12 @@ int main(__attribute__((unused)) int argc, char** argv) {
     char producerSemaphoreName[256];
     char consumerSemaphoreName[256];
     char* ptr1, *ptr2;
+
+    if (argc != 4) {
+        printf("No se ingresaron los datos necesarios\n");
+        return 1;
+    }
+
     // Set name to the buffer and shared struct
     strcpy(bufferName, argv[1]);
     strcpy(structName, argv[1]);

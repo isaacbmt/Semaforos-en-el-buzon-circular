@@ -76,7 +76,7 @@ int main(__attribute__((unused)) int argc, char** argv) {
     mode chosen_mode = strcmp(argv[2], "auto") == 0? automatic : strcmp(argv[2], "manual") == 0? manual : no_specified;
 
     if (chosen_mode == no_specified) {
-        printf("Error: No se especifico el modo del productor");
+        printf("Error: No se especifico el modo del productor\n");
         return 1;
     }
 
@@ -125,21 +125,16 @@ int openSemaphores (char* statsSemaphoreName,
                     char* producerSemaphoreName, char* consumerSemaphoreName) {
 
     producerSem = sem_open(producerSemaphoreName, 0);
-
     if (producerSem == SEM_FAILED) {
         perror("Opening the producer semaphore failed\n");
         return 1;
     }
-
     consumerSem  = sem_open(consumerSemaphoreName, 0);
-
     if(consumerSem == SEM_FAILED) {
         perror("Opening the consumer semaphore failed\n");
         return 1;
     }
-
     statsSem = sem_open(statsSemaphoreName, 0);
-
     if (statsSem == SEM_FAILED) {
         perror("Opening the stats semaphore failed\n");
         return 1;
@@ -210,7 +205,7 @@ int run_process(mode chosen_mode, int *map, struct Stats* stats, sem_t* statsSem
         }
         switch (chosen_mode) {
             case automatic:
-                sprintf(message, "Hola soy un mensaje autogenerado y mi numero favorito es el %d", rand()%30);
+                sprintf(message, "Hola soy un mensaje autogenerado y mi numero favorito es el %d", rand()%45);
                 break;
             case manual:
                 printf("Escribe un mensaje: ");

@@ -202,11 +202,9 @@ int run_process(struct Stats* stats, sem_t* statsSem, sem_t* producerSem, sem_t*
     int current_cons = stats->consumers, current_prod = stats->producers;
     while(1){
         sem_wait(statsSem);
-
         if (stats->consumers == 0 && stats->producers) {
             sem_post(producerSem);
         }
-
         if(stats->consumers == 0 && stats->producers == 0) {
             sem_post(statsSem);
             break;

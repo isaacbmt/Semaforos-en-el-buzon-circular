@@ -77,7 +77,7 @@ int main(__attribute__((unused)) int argc, char** argv) {
     mode chosen_mode = strcmp(argv[2], "auto") == 0? automatic : strcmp(argv[2], "manual") == 0? manual : no_specified;
 
     if (chosen_mode == no_specified) {
-        printf("Error: No se especifico el modo del consumidor");
+        printf("Error: No se especifico el modo del consumidor\n");
         return 1;
     }
 
@@ -252,13 +252,11 @@ int run_process(mode chosen_mode, int *map, struct Stats* stats, sem_t* statsSem
         sem_post(producerSem);
         // Aquí iría el SLEEPPPPPPPPPPPPPPPPP
         sem_post(statsSem);
-
     }
     return 0;
 }
 
 void printFinalMessage(int exitCode, int processID) {
-    printf("Se escriben todos los datos finales\n");
     printf(RED);
     printf("* * * * * Se ha cerrado este consumidor * * * * *\n");
     printf(RED);
